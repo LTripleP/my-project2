@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Selector</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d47a1, #1e88e5);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            width: 100%;
+            max-width: 400px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .refresh-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .refresh-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .selector-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: #ffffff;
+            color: #333;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            appearance: none;
+        }
+
+        select:focus {
+            outline: none;
+            border: 2px solid #1e88e5;
+        }
+
+        label {
+            position: absolute;
+            left: 10px;
+            top: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 0 5px;
+            color: #f0f0f0;
+            transition: transform 0.2s ease, color 0.2s ease;
+            pointer-events: none;
+        }
+
+        select:focus + label,
+        select:not(:placeholder-shown) + label {
+            transform: translateY(-20px) scale(0.8);
+            color: #0088ff;
+            font-size: larger;
+        }
+
+        .car-info {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            color: #f0f0f0;
+            font-size: 1.1rem;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .car-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Home</h2>
+        <img src="refresh-icon.png" alt="Refresh" class="refresh-icon" onclick="refreshPage()">
+    </div>
+
+    <div class="selector-container">
+        <div class="form-group">
+            <select id="year" onchange="populateMakes()" required>
+                <option value="" disabled selected hidden>Select Year</option>
+            </select>
+            <label for="year">Year</label>
+        </div>
+
+        <div class="form-group" id="make-group" style="display: none;">
+            <select id="make" onchange="populateModels()" required>
+                <option value="" disabled selected hidden>Select Make</option>
+            </select>
+            <label for="make">Make</label>
+        </div>
+
+        <div class="form-group" id="model-group" style="display: none;">
+            <select id="model" onchange="populateTrims()" required>
+                <option value="" disabled selected hidden>Select Model</option>
+            </select>
+            <label for="model">Model</label>
+        </div>
+
+        <div class="form-group" id="trim-group" style="display: none;">
+            <select id="trim" onchange="showCarInfo()" required>
+                <option value="" disabled selected hidden>Select Trim</option>
+            </select>
+            <label for="trim">Trim</label>
+        </div>
+    </div>
+
+    <div id="car-info" class="car-info"></div>
+
+    <script>
+        const carData = {
+            "2023": {
+                "Toyota": {
+                    "Camry": {
+                        "SE": {
+                            MSRP: "$27,000",
+                            Description: "Sporty midsize sedan",
+                            Type: "Sedan",
+                            Doors: 4,
+                            Seats: 5,
+                            Length: "192.1 in",
+                            Width: "72.4 in",
+                            Height: "56.9 in",
+                            Wheelbase: "111.2 in",
+                            FrontTrack: "63.0 in",
+                            RearTrack: "63.4 in",
+                            GroundClearance: "5.7 in",
+                            CargoCapacity: "15.1 cu ft",
+                            MaxCargoCapacity: "15.1 cu ft",
+                            CurbWeight: "3,300 lbs",
+                            GrossWeight: "4,400 lbs",
+                            Mileage: {
+                                FuelTankCapacity: "15.8 gallons",
+                                CombinedMPG: 28,
+                                EPACityMPG: 25,
+                                EPAHighwayMPG: 34,
+                                RangeCity: "395 miles",
+                                RangeHighway: "536 miles"
+                            },
+                            Engine: {
+                                EngineType: "I4",
+                                EngineCylinders: 4,
+                                EngineSize: "2.5 L",
+                                EngineHorsepower: "206 hp",
+                                EngineTorqueFtLbs: "186 ft-lbs",
+                                EngineTorqueRPM: "5,000 rpm",
+                                EngineFuelType: "Gasoline",
+                                EngineCamType: "DOHC",
+                                DriverType: "Front-Wheel Drive",
+                                EngineTransmission: "8-Speed Automatic",
+                            }
+                        }
+                    },
+                    "Corolla": {
+                        "LE": {
+                            MSRP: "$21,000",
+                            Description: "Compact and efficient",
+                            Type: "Sedan",
+                            Doors: 4,
+                            Seats: 5,
+                            Length: "182.3 in",
+                            Width: "70.1 in",
+                            Height: "57.3 in",
+                            Wheelbase: "106.3 in",
+                            FrontTrack: "60.0 in",
+                            RearTrack: "60.0 in",
+                            GroundClearance: "6.7 in",
+                            CargoCapacity: "13.1 cu ft",
+                            MaxCargoCapacity: "13.1 cu ft",
+                            CurbWeight: "2,950 lbs",
+                            GrossWeight: "3,800 lbs",
+                            Mileage: {
+                                FuelTankCapacity: "13.2 gallons",
+                                CombinedMPG: 32,
+                                EPACityMPG: 30,
+                                EPAHighwayMPG: 38,
+                                RangeCity: "396 miles",
+                                RangeHighway: "501 miles"
+                            },
+                            Engine: {
+                                EngineType: "I4",
+                                EngineCylinders: 4,
+                                EngineSize: "1.8 L",
+                                EngineHorsepower: "139 hp",
+                                EngineTorqueFtLbs: "126 ft-lbs",
+                                EngineTorqueRPM: "4,000 rpm",
+                                EngineFuelType: "Gasoline",
+                                EngineCamType: "DOHC",
+                                DriverType: "Front-Wheel Drive",
+                                EngineTransmission: "Variable Transmission",
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        function populateYears() {
+            const yearSelect = document.getElementById("year");
+            yearSelect.innerHTML = '<option value="" disabled selected hidden>Select Year</option>';
+            for (const year in carData) {
+                const option = document.createElement("option");
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        function populateMakes() {
+            const year = document.getElementById("year").value;
+            const makeSelect = document.getElementById("make");
+            makeSelect.innerHTML = '<option value="" disabled selected hidden>Select Make</option>';
+            document.getElementById("model").innerHTML = '<option value="" disabled selected hidden>Select Model</option>';
+            document.getElementById("trim").innerHTML = '<option value="" disabled selected hidden>Select Trim</option>';
+            document.getElementById("car-info").style.display = "none";
+
+            if (year && carData[year]) {
+                document.getElementById("make-group").style.display = "block";
+                for (const make in carData[year]) {
+                    const option = document.createElement("option");
+                    option.value = make;
+                    option.textContent = make;
+                    makeSelect.appendChild(option);
+                }
+            } else {
+                document.getElementById("make-group").style.display = "none";
+            }
+        }
+
+        function populateModels() {
+            const year = document.getElementById("year").value;
+            const make = document.getElementById("make").value;
+            const modelSelect = document.getElementById("model");
+            modelSelect.innerHTML = '<option value="" disabled selected hidden>Select Model</option>';
+            document.getElementById("trim").innerHTML = '<option value="" disabled selected hidden>Select Trim</option>';
+            document.getElementById("car-info").style.display = "none";
+
+            if (year && make && carData[year][make]) {
+                document.getElementById("model-group").style.display = "block";
+                for (const model in carData[year][make]) {
+                    const option = document.createElement("option");
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                }
+            } else {
+                document.getElementById("model-group").style.display = "none";
+            }
+        }
+
+        function populateTrims() {
+            const year = document.getElementById("year").value;
+            const make = document.getElementById("make").value;
+            const model = document.getElementById("model").value;
+            const trimSelect = document.getElementById("trim");
+            trimSelect.innerHTML = '<option value="" disabled selected hidden>Select Trim</option>';
+            document.getElementById("car-info").style.display = "none";
+
+            if (year && make && model && carData[year][make][model]) {
+                document.getElementById("trim-group").style.display = "block";
+                for (const trim in carData[year][make][model]) {
+                    const option = document.createElement("option");
+                    option.value = trim;
+                    option.textContent = trim;
+                    trimSelect.appendChild(option);
+                }
+            } else {
+                document.getElementById("trim-group").style.display = "none";
+            }
+        }
+
+        function showCarInfo() {
+            const year = document.getElementById("year").value;
+            const make = document.getElementById("make").value;
+            const model = document.getElementById("model").value;
+            const trim = document.getElementById("trim").value;
+            const carInfoDiv = document.getElementById("car-info");
+
+            if (year && make && model && trim && carData[year][make][model][trim]) {
+                const { MSRP, Description, Type, Doors, Seats, Length, Width, Height, Wheelbase, FrontTrack, RearTrack, GroundClearance, CargoCapacity, MaxCargoCapacity, CurbWeight, GrossWeight, Mileage, Engine } = carData[year][make][model][trim];
+                carInfoDiv.innerHTML = `
+                    <h3><strong>+Result:</strong></h3>
+                    <p><strong>Year:</strong> ${year}</p>
+                    <p><strong>Make:</strong> ${make}</p>
+                    <p><strong>Model:</strong> ${model}</p>
+                    <p><strong>Trim:</strong> ${trim}</p>
+                    <p><strong>MSRP:</strong> ${MSRP}</p>
+                    <p><strong>Description:</strong> ${Description}</p>
+                    <p><strong>Type:</strong> ${Type}</p>
+                    <p><strong>Doors:</strong> ${Doors}</p>
+                    <p><strong>Seats:</strong> ${Seats}</p>
+                    <p><strong>Length:</strong> ${Length}</p>
+                    <p><strong>Width:</strong> ${Width}</p>
+                    <p><strong>Height:</strong> ${Height}</p>
+                    <p><strong>Wheelbase:</strong> ${Wheelbase}</p>
+                    <p><strong>Front Track:</strong> ${FrontTrack}</p>
+                    <p><strong>Rear Track:</strong> ${RearTrack}</p>
+                    <p><strong>Ground Clearance:</strong> ${GroundClearance}</p>
+                    <p><strong>Cargo Capacity:</strong> ${CargoCapacity}</p>
+                    <p><strong>Max Cargo Capacity:</strong> ${MaxCargoCapacity}</p>
+                    <p><strong>Curb Weight:</strong> ${CurbWeight}</p>
+                    <p><strong>Gross Weight:</strong> ${GrossWeight}</p>
+                    <h3><strong>+Mileage:</strong></h3>
+                    <p><strong>Fuel Tank Capacity:</strong> ${Mileage.FuelTankCapacity}</p>
+                    <p><strong>Combined MPG:</strong> ${Mileage.CombinedMPG}</p>
+                    <p><strong>EPA City MPG:</strong> ${Mileage.EPACityMPG}</p>
+                    <p><strong>EPA Highway MPG:</strong> ${Mileage.EPAHighwayMPG}</p>
+                    <p><strong>Range City:</strong> ${Mileage.RangeCity}</p>
+                    <p><strong>Range Highway:</strong> ${Mileage.RangeHighway}</p>
+                    <p><strong>+Engine Specifications:</strong></p>
+                    <p><strong>Engine Type:</strong> ${Engine.EngineType}</p>
+                    <p><strong>Engine Cylinders:</strong> ${Engine.EngineCylinders}</p>
+                    <p><strong>Engine Size:</strong> ${Engine.EngineSize}</p>
+                    <p><strong>Engine Horsepower:</strong> ${Engine.EngineHorsepower}</p>
+                    <p><strong>Engine Torque (Ft-Lbs):</strong> ${Engine.EngineTorqueFtLbs}</p>
+                    <p><strong>Engine Torque RPM:</strong> ${Engine.EngineTorqueRPM}</p>
+                    <p><strong>Engine Fuel Type:</strong> ${Engine.EngineFuelType}</p>
+                    <p><strong>Engine Cam Type:</strong> ${Engine.EngineCamType}</p>
+                    <p><strong>Driver Type:</strong> ${Engine.DriverType}</p>
+                    <p><strong>Engine Transmission:</strong> ${Engine.EngineTransmission}</p>
+                `;
+                carInfoDiv.style.display = "block";
+            } else {
+                carInfoDiv.style.display = "none";
+            }
+        }
+
+        function refreshPage() {
+            location.reload();
+        }
+
+        // Initialize the year dropdown on page load
+        populateYears();
+    </script>
+</body>
+</html>
